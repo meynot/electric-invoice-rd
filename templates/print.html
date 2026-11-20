@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>RI {{ result.encf }}</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="manifest" href="/icons/site.webmanifest" />
+  <link rel="stylesheet" href="/static/styles.css?v=2" />
+</head>
+<body class="print-page">
+  <main class="print-sheet">
+    <header class="print-header">
+      <div>
+        <h1>{{ snapshot.issuer_name if snapshot else "—" }}</h1>
+        <p><span data-i18n="rnc">RNC</span>: {{ snapshot.issuer_rnc if snapshot else "—" }}</p>
+        <p>{{ snapshot.issuer_address if snapshot else "" }}</p>
+      </div>
+      <div class="print-meta">
+        <p><strong id="docTypeLabel">{% if result.tipoe_cf == 31 %}TAX CREDIT INVOICE{% else %}CONSUMER INVOICE{% endif %}</strong></p>
+        <p><span data-i18n="invoice_number">Invoice number</span>: <strong>{{ result.invoice_number }}</strong></p>
+        <p>e-NCF: <strong>{{ result.encf }}</strong></p>
+        {% if snapshot and snapshot.fecha_vencimiento %}
+        <p><span data-i18n="sequence_expiry">Sequence expiry</span>: {{ snapshot.fecha_vencimiento }}</p>
+        {% endif %}
+        <p><span data-i18n="issue_date">Issue date</span>: {{ snapshot.fecha_emision if snapshot else "—" }}</p>
+        <p><span data-i18n="dgii_status">DGII status</span>: {{ result.estado or "—" }}</p>
+      </div>
+    </header>
+
+    {% if snapshot and snapshot.buyer_rnc %}
+    <section>
+      <h2 data-i18n="buyer">Buyer</h2>
+      <p>{{ snapshot.buyer_name }}</p>
+      <p><span data-i18n="rnc">RNC</span>: {{ snapshot.buyer_rnc }}</p>
+    </section>
+    {% endif %}
+
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th data-i18n="description">Description</th>
+          <th data-i18n="qty_short">Qty</th>
+          <th data-i18n="price">Price</th>
+          <th data-i18n="amount">Amount</th>
+          <th data-i18n="ind_short">Ind.</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if snapshot %}
+        {% for line in snapshot.lines %}
+        <tr>
+          <td>{{ line.numero }}</td>
+          <td>{{ line.name }}</td>
+          <td>{{ line.quantity }}</td>
+          <td>{{ line.unit_price }}</td>
+          <td>{{ line.amount }}</td>
+          <td>{{ line.tax_indicator }}</td>
+        </tr>
+        {% endfor %}
+        {% endif %}
+      </tbody>
+    </table>
+
+    <section class="totals">
+      {% if snapshot %}
+      <p><span data-i18n="taxed">Taxed</span>: RD$ {{ snapshot.monto_gravado_total }}</p>
+      <p><span data-i18n="exempt">Exempt</span>: RD$ {{ snapshot.monto_exento }}</p>
+      <p><span data-i18n="itbis">ITBIS</span>: RD$ {{ snapshot.total_itbis }}</p>
+      <p class="grand"><strong><span data-i18n="total">Total</span>: RD$ {{ snapshot.monto_total }}</strong></p>
+      {% else %}
+      <p class="grand"><strong><span data-i18n="total">Total</span>: RD$ {{ monto_total }}</strong></p>
+      {% endif %}
+    </section>
+
+    <section class="qr-block">
+      <img src="/api/invoices/{{ result.encf }}/qr.png" alt="QR" width="140" height="140" />
+      <div>
+        <p><span data-i18n="security_code">Security code</span>: <strong>{{ result.codigo_seguridad }}</strong></p>
+        <p><span data-i18n="digital_signature_date">Digital signature date</span>: {{ result.fecha_firma }}</p>
+        <p class="muted small">{{ result.qr_url }}</p>
+      </div>
+    </section>
+
+    <p class="actions no-print">
+      <label class="lang-switcher inline">
+        <span data-i18n="language">Language</span>
+        <select id="languageSelect" aria-label="Language"></select>
+      </label>
+      <button onclick="window.print()" data-i18n="print">Print</button>
+      <a href="/" data-i18n="back">Back</a>
+    </p>
+  </main>
+  <script>
+    window.__PRINT_TIPOE_CF__ = {{ result.tipoe_cf }};
+  </script>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/print.js"></script>
+</body>
+</html>

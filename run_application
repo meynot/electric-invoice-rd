@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# Start the DGII e-CF issuer (FastAPI + uvicorn).
+set -euo pipefail
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$ROOT"
+
+HOST="${HOST:-127.0.0.1}"
+PORT="${PORT:-8000}"
+RELOAD="${RELOAD:-1}"
+
+if [[ ! -f .env ]]; then
+  if [[ -f .env.example ]]; then
+    cp .env.example .env
+    echo "Created .env from .env.example — edit DGII_P12_PATH and related values."
+  else
+    echo "Missing .env — copy .env.example and configure it first." >&2
+    exit 1
+  fi
+fi
+
+if [[ ! -d .venv ]]; then
+  python3 -m venv .venv
+fi
+
+# shellcheck disable=SC1091
+source .venv/bin/activate
+
+python -m pip install -q --upgrade pip
+python -m pip install -q -r requirements.txt
+
+ARGS=(main:app --host "$HOST" --port "$PORT")
+if [[ "$RELOAD" == "1" ]]; then
+  ARGS+=(--reload)
+fi
+
+echo "Starting DGII e-CF issuer at http://${HOST}:${PORT}"
+exec uvicorn "${ARGS[@]}"

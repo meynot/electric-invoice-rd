@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title data-i18n="app_title">DGII e-CF Issuer</title>
+  <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="manifest" href="/icons/site.webmanifest" />
+  <link rel="stylesheet" href="/static/styles.css?v=2" />
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <div>
+        <h1 data-i18n="page_heading">e-CF issuance (E31 / E32)</h1>
+        <div class="meta-strip">
+          <span class="meta-chip"><span data-i18n="environment">Environment</span>: <strong id="envLabel">—</strong></span>
+          <span class="meta-chip"><span data-i18n="next_invoice">Next invoice</span>: <strong id="nextInvoiceLabel">—</strong></span>
+        </div>
+      </div>
+      <label class="lang-switcher">
+        <span data-i18n="language">Language</span>
+        <select id="languageSelect" aria-label="Language"></select>
+      </label>
+    </header>
+
+    <form id="invoiceForm">
+      <section class="card collapsible collapsed" data-collapse>
+        <button type="button" class="collapse-toggle" aria-expanded="false">
+          <h2 data-i18n="document">Document</h2>
+          <span class="collapse-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="collapse-body">
+          <div class="grid">
+            <label><span data-i18n="type">Type</span>
+              <select id="tipoe_cf" name="tipoe_cf" required>
+                <option value="31" data-i18n="type_31">E31 — Tax Credit Invoice</option>
+                <option value="32" data-i18n="type_32">E32 — Consumer Invoice</option>
+              </select>
+            </label>
+            <label><span data-i18n="encf">e-NCF</span>
+              <input id="encf" name="encf" required placeholder="E310000000001" pattern="E(31|32)[0-9]{10}" />
+            </label>
+            <label id="sequenceExpiryField"><span data-i18n="sequence_expiry">Sequence expiry</span>
+              <input id="fecha_vencimiento_secuencia" name="fecha_vencimiento_secuencia" type="date" />
+            </label>
+            <label><span data-i18n="issue_date">Issue date</span>
+              <input id="fecha_emision" name="fecha_emision" type="date" />
+            </label>
+            <label><span data-i18n="income_type">Income type</span>
+              <select id="tipo_ingresos" name="tipo_ingresos">
+                <option value="01" data-i18n="income_01">01 — Operations</option>
+                <option value="02" data-i18n="income_02">02 — Financial</option>
+                <option value="03" data-i18n="income_03">03 — Extraordinary</option>
+                <option value="04" data-i18n="income_04">04 — Leases</option>
+                <option value="05" data-i18n="income_05">05 — Exports</option>
+                <option value="06" data-i18n="income_06">06 — Other</option>
+              </select>
+            </label>
+            <label><span data-i18n="payment_type">Payment type</span>
+              <select id="tipo_pago" name="tipo_pago">
+                <option value="1" data-i18n="payment_1">1 — Cash</option>
+                <option value="2" data-i18n="payment_2">2 — Credit</option>
+                <option value="3" data-i18n="payment_3">3 — Free</option>
+              </select>
+            </label>
+            <label id="paymentDueField" class="hidden"><span data-i18n="payment_due">Payment due date</span>
+              <input id="fecha_limite_pago" name="fecha_limite_pago" type="date" />
+            </label>
+            <label class="checkbox">
+              <input id="dry_run" name="dry_run" type="checkbox" checked />
+              <span data-i18n="dry_run">Dry run (sign without sending to DGII)</span>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card collapsible collapsed" data-collapse>
+        <button type="button" class="collapse-toggle" aria-expanded="false">
+          <h2 data-i18n="issuer">Issuer</h2>
+          <span class="collapse-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="collapse-body">
+          <div class="grid">
+            <label><span data-i18n="rnc">RNC</span>
+              <input id="issuer_rnc" required />
+            </label>
+            <label><span data-i18n="legal_name">Legal name</span>
+              <input id="issuer_name" required />
+            </label>
+            <label class="span-2"><span data-i18n="address">Address</span>
+              <input id="issuer_address" required />
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card collapsible" data-collapse>
+        <button type="button" class="collapse-toggle" aria-expanded="true">
+          <h2 data-i18n="buyer">Buyer</h2>
+          <span class="collapse-chevron" aria-hidden="true"></span>
+        </button>
+        <div class="collapse-body">
+          <p class="muted" data-i18n="buyer_hint">Required for E31 and for E32 when total ≥ RD$250,000.00</p>
+          <div class="grid">
+            <label><span data-i18n="rnc">RNC</span>
+              <input id="buyer_rnc" />
+            </label>
+            <label><span data-i18n="legal_name">Legal name</span>
+              <input id="buyer_name" />
+            </label>
+            <label class="span-2"><span data-i18n="address">Address</span>
+              <input id="buyer_address" />
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="row-between">
+          <h2 data-i18n="items">Items</h2>
+          <button type="button" id="addItem" class="secondary" data-i18n="add_item">Add item</button>
+        </div>
+        <div id="items"></div>
+      </section>
+
+      <div class="actions">
+        <button type="submit" data-i18n="emit">Issue e-CF</button>
+      </div>
+    </form>
+
+    <section id="result" class="card hidden">
+      <h2 data-i18n="result">Result</h2>
+      <div id="resultBody"></div>
+    </section>
+
+    <section id="errors" class="card error hidden">
+      <h2 data-i18n="error">Error</h2>
+      <pre id="errorBody"></pre>
+    </section>
+
+    <section class="card">
+      <h2 data-i18n="saved_invoices">Saved invoices</h2>
+      <div id="invoiceList" class="muted table-scroll">—</div>
+    </section>
+  </main>
+  <script src="/static/i18n.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
